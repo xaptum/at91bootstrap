@@ -1,0 +1,68 @@
+/**
+ *  Copyright (c) 2018, Xaptum, Inc.
+ */
+#ifndef __XAPRC001_H__
+#define __XAPRC001_H__
+
+/*
+ * PMC Settings
+ */
+#define BOARD_MAINOSC		12000000
+
+/* PCK: 498MHz, MCK: 166MHz */
+#ifdef CONFIG_BUS_SPEED_166MHZ
+#define BOARD_PLLA_MULA		82
+#endif
+/* SAMA5D23 - SAMA5D28
+Frequency Monitor limitations
+PCK: 348MHz, MCK: 116MHz */
+#ifdef CONFIG_BUS_SPEED_116MHZ
+#define BOARD_PLLA_MULA		57
+#endif
+
+#define BOARD_PCK		((unsigned long)((BOARD_MAINOSC * (BOARD_PLLA_MULA + 1)) / 2))
+#define BOARD_MCK		((unsigned long)((BOARD_MAINOSC * (BOARD_PLLA_MULA + 1)) / 2 / 3))
+
+#define BOARD_CKGR_PLLA		(AT91C_CKGR_SRCA | AT91C_CKGR_OUTA_0)
+#define BOARD_PLLACOUNT		(0x3F << 8)
+#define BOARD_MULA		((AT91C_CKGR_MULA << 2) & (BOARD_PLLA_MULA << 18))
+#define BOARD_DIVA		(AT91C_CKGR_DIVA & 1)
+
+#define BOARD_PRESCALER_MAIN_CLOCK	(AT91C_PMC_PLLADIV2_2 \
+					| AT91C_PMC_MDIV_3 \
+					| AT91C_PMC_CSS_MAIN_CLK)
+
+#define BOARD_PRESCALER_PLLA		(AT91C_PMC_H32MXDIV_H32MXDIV2 \
+					| AT91C_PMC_PLLADIV2_2 \
+					| AT91C_PMC_MDIV_3 \
+					| AT91C_PMC_CSS_PLLA_CLK)
+
+#ifdef CONFIG_BUS_SPEED_166MHZ
+#define MASTER_CLOCK		166000000
+#endif
+#ifdef CONFIG_BUS_SPEED_116MHZ
+#define MASTER_CLOCK		116000000
+#endif
+
+#define PLLA_SETTINGS		(BOARD_CKGR_PLLA | \
+				BOARD_PLLACOUNT | \
+				BOARD_MULA | \
+				BOARD_DIVA)
+
+/*
+ * DBGU Settings
+ */
+#define USART_BASE			AT91C_BASE_UART1
+#define CONFIG_SYS_DBGU_RXD_PIN	AT91C_PIN_PD(2)
+#define CONFIG_SYS_DBGU_TXD_PIN	AT91C_PIN_PD(3)
+#define CONFIG_SYS_DBGU_ID		AT91C_ID_UART1
+
+/*
+ * SDHC Settings
+ */
+#ifdef CONFIG_SDHC0
+#define CONFIG_SYS_BASE_SDHC	AT91C_BASE_SDHC0
+#define CONFIG_SYS_ID_SDHC	AT91C_ID_SDMMC0
+#endif
+
+#endif

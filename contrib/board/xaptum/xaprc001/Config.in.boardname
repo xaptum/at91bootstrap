@@ -1,0 +1,2 @@
+config CONFIG_BOARDNAME
+	default "xaprc001" if CONFIG_XAPRC001
