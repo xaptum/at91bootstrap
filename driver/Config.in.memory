@@ -191,6 +191,21 @@ config CONFIG_SDHC1
 
 endchoice
 
+choice CONFIG_SDHC_VOLTAGE
+	prompt "SD Host I/O Voltage"
+	depends on CONFIG_SDHC
+	default CONFIG_SDHC_VOLTAGE_3_3
+	help
+	  This interface allows you to select which I/O voltage is used for the SD Card.
+
+config CONFIG_SDHC_VOLTAGE_1_8
+	bool "1.8V"
+
+config CONFIG_SDHC_VOLTAGE_3_3
+	bool "3.3V"
+
+endchoice
+
 config CONFIG_FATFS
 	bool
 	depends on CONFIG_SDCARD

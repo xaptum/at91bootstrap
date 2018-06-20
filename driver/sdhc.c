@@ -270,6 +270,35 @@
 #define	SDMMC_HC1R_CARDDTL	(0x1 << 6)	/* Card Detect Test Level */
 #define	SDMMC_HC1R_CARDDSEL	(0x1 << 7)	/* Card Detect Signal Selection */
 
+/* SDMMC_HC2R */
+#define	SDMMC_HC2R_UHSMS	(0x7 << 0)	/* UHS Mode Select */
+#define		SDMMC_HC2R_UHSMS_SDR12		(0x0 << 0)
+#define		SDMMC_HC2R_UHSMS_SDR25		(0x1 << 0)
+#define		SDMMC_HC2R_UHSMS_SDR50		(0x2 << 0)
+#define		SDMMC_HC2R_UHSMS_SDR104	(0x3 << 0)
+#define		SDMMC_HC2R_UHSMS_DDR50		(0x4 << 0)
+#define	SDMMC_HC2R_HS200EN	(0xF << 0)	/* HS200 Mode Enable */
+#define		SDMMC_HC2R_HS200EN_HS200	(0xB << 0)
+#define	SDMMC_HC2R_VS18EN	(0x1 << 3)	/* 1.8V Signaling Enable */
+#define	SDMMC_HC2R_DRVSEL	(0x3 << 4)	/* Driver Strength Select */
+#define		SDMMC_HC2R_DRVSEL_TYPEA	(0x0 << 4)
+#define		SDMMC_HC2R_DRVSEL_TYPEB	(0x1 << 4)
+#define		SDMMC_HC2R_DRVSEL_TYPEC	(0x2 << 4)
+#define		SDMMC_HC2R_DRVSEL_TYPED	(0x3 << 4)
+#define	SDMMC_HC2R_EXTUN	(0x1 << 6)	/* Execute Timing */
+#define	SDMMC_HC2R_SCLKSEL	(0x1 << 7)	/* Sampling Clock Select */
+#define	SDMMC_HC2R_ASINTEN	(0x1 << 14)	/* Asynchronous Interrupt Enable */
+#define	SDMMC_HC2R_PVALEN	(0x1 << 15)	/* Preset Value Enable */
+
+/* SDMMC_CALCR */
+#define	SDMMC_CALCR_EN		(0x1  << 0)	/* PADs Calibration Enable */
+#define	SDMMC_CALCR_ALWYSON	(0x1  << 4)	/* Calibration Analog Always ON */
+#define	SDMMC_CALCR_TUNDIS	(0x1  << 5)	/* Calibration During Tuning Disabled */
+#define	SDMMC_CALCR_CNTVAL	(0xFF << 8)	/* Calibration Counter Value */
+#define		SDMMC_CALCR_CNTVAL_VAL(val) ((SDMMC_CALCR_CNTVAL & ((val) << 8)))
+#define	SDMMC_CALCR_CALN	(0xF  << 16)	/* Calibration N Status */
+#define	SDMMC_CALCR_CALP	(0xF  << 24)	/* Calibration P Status */
+
 /*---------------------------------------------------------------*/
 
 static unsigned int sdhc_get_base(void)
@@ -329,6 +358,18 @@ static void sdhc_softare_reset_dat(void)
 
 	while (sdhc_readb(SDMMC_SRR) & SDMMC_SRR_SWRSTDAT)
 		;
+}
+
+static void sdhc_set_io_voltage(void)
+{
+#ifdef CONFIG_SDHC_VOLTAGE_1_8
+	unsigned short value = sdhc_readw(SDMMC_HC2R);
+
+	value |= SDMMC_HC2R_VS18EN;
+	value |= SDMMC_HC2R_DRVSEL_TYPEC;
+
+	sdhc_writew(SDMMC_HC2R, value);
+#endif
 }
 
 static void sdhc_set_power(void)
@@ -436,6 +477,28 @@ static int sdhc_set_bus_width(struct sd_card *sdcard, unsigned int width)
 	return 0;
 }
 
+#define ROUND_INT_DIV(n,d) (((n) + ((d)-1)) / (d))
+
+static int sdhc_set_tuning(struct sd_card *sdcard)
+{
+	unsigned int cntval = ROUND_INT_DIV(sdcard->host->caps_max_clock,
+					    4 * 500000UL);
+
+	unsigned long value = sdhc_readl(SDMMC_CALCR);
+	value |= SDMMC_CALCR_EN;
+	value |= SDMMC_CALCR_ALWYSON;
+	value &= ~SDMMC_CALCR_TUNDIS;
+	value &= ~SDMMC_CALCR_CNTVAL;
+	value |= SDMMC_CALCR_CNTVAL_VAL(cntval);
+	sdhc_writel(SDMMC_CALCR, value);
+
+	do {
+		value = sdhc_readl(SDMMC_CALCR);
+	} while (value & SDMMC_CALCR_EN);
+
+	return 0;
+}
+
 static int sdhc_host_capability(struct sd_card *sdcard)
 {
 	struct sd_host *host = sdcard->host;
@@ -522,9 +585,13 @@ static int sdhc_init(struct sd_card *sdcard)
 
 	sdhc_softare_reset();
 
+	sdhc_set_io_voltage();
+
 	sdhc_set_power();
 
 	sdhc_host_capability(sdcard);
+
+	sdhc_set_tuning(sdcard);
 
 	if (sdhc_is_card_inserted(sdcard) <= 0) {
 		dbg_info("SDHC: Error: No Card Inserted\n");
