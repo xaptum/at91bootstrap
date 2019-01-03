@@ -460,3 +460,7 @@ endif
 ifeq ($(CONFIG_QSPI), y)
 CPPFLAGS += -DCONFIG_QSPI
 endif
+
+ifeq ($(CONFIG_NOFLASH), y)
+CPPFLAGS += -DCONFIG_NOFLASH
+endif
