@@ -131,6 +131,9 @@ config	CONFIG_SDCARD
 	bool "SD card"
 	depends on ALLOW_SDCARD
 
+config CONFIG_NOFLASH
+        bool "none"
+
 endchoice
 
 config CONFIG_MEMORY

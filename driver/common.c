@@ -46,6 +46,12 @@ char cmdline_args[CMDLINE_BUF_LEN];
 #endif
 #endif
 
+/* Do not interact with any NVMEM and return success. */
+int skip_image_load(struct image_info *image)
+{
+	return 0;
+}
+
 void init_load_image(struct image_info *image)
 {
 	memset(image,		0, sizeof(*image));
@@ -115,6 +121,8 @@ void init_load_image(struct image_info *image)
 	load_image = &load_nandflash;
 #elif defined(CONFIG_SDCARD)
 	load_image = &load_sdcard;
+#elif defined(CONFIG_NOFLASH)
+	load_image = &skip_image_load;
 #else
 #error "No booting media_str specified!"
 #endif
