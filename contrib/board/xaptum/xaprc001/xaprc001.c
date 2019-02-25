@@ -383,6 +383,11 @@ void at91_init_can_message_ram(void)
  */
 void hw_init(void)
 {
+#if defined(CONFIG_XAP_INIT_DDR_SELF_REFRESH)
+	/* set self-refresh DDR3 */
+	writel(AT91C_DDRC2_LPCB_SELFREFRESH, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
+#endif
+
 	/* Disable watchdog */
 	at91_disable_wdt();
 
@@ -420,6 +425,11 @@ void hw_init(void)
 	l2cache_prepare();
 
 	at91_init_can_message_ram();
+
+#if defined(CONFIG_XAP_INIT_DDR_SELF_REFRESH)
+	/* disable self-refresh DDR3 */
+	writel(AT91C_DDRC2_LPCB_DISABLED, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
+#endif
 }
 #endif /* #ifdef CONFIG_HW_INIT */
 
