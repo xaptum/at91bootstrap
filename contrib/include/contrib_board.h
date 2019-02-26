@@ -57,7 +57,7 @@
 #include "sama5d3_linea.h"
 #endif
 
-#ifdef CONFIG_XAPRC001
+#if defined(CONFIG_XAPRC001) || defined(CONFIG_XAPRC001_PROV)
 #include "xaprc001.h"
 #endif
 
