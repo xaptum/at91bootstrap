@@ -10,16 +10,3 @@ config CONFIG_XAPRC001
 	select SUPPORT_BUS_SPEED_166MHZ
 	help
 	  Use the Xaptum XAP-RC-001 platform
-
-config CONFIG_XAPRC001_PROV
-        bool "xaprc001_prov"
-        select SAMA5D2
-        select CONFIG_CPU_V7
-        select CONFIG_DDRC
-        select ALLOW_SDCARD
-        select ALLOW_CPU_CLK_498MHZ
-        select ALLOW_CRYSTAL_12_000MHZ
-        select CONFIG_HAS_HW_INFO
-        select SUPPORT_BUS_SPEED_166MHZ
-        help
-          Use the Xaptum XAP-RC-001 platform with provisioning settings
