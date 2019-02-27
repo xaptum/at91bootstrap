@@ -385,7 +385,7 @@ void hw_init(void)
 {
 #if defined(CONFIG_XAP_INIT_DDR_SELF_REFRESH)
 	/* set self-refresh DDR3 */
-	writel(AT91C_DDRC2_LPCB_SELFREFRESH, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
+//	writel(AT91C_DDRC2_LPCB_SELFREFRESH, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
 #endif
 
 	/* Disable watchdog */
@@ -428,7 +428,7 @@ void hw_init(void)
 
 #if defined(CONFIG_XAP_INIT_DDR_SELF_REFRESH)
 	/* disable self-refresh DDR3 */
-	writel(AT91C_DDRC2_LPCB_DISABLED, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
+//	writel(AT91C_DDRC2_LPCB_DISABLED, AT91C_BASE_MPDDRC + HDDRSDRC2_LPR);
 #endif
 }
 #endif /* #ifdef CONFIG_HW_INIT */
